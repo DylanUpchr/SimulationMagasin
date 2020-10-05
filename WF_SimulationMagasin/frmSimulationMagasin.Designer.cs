@@ -1,6 +1,6 @@
 ﻿namespace WF_SimulationMagasin
 {
-    partial class Form1
+    partial class frmSimulationMagasin
     {
         /// <summary>
         /// Variable nécessaire au concepteur.
@@ -28,13 +28,34 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            this.magasin1 = new WF_SimulationMagasin.Magasin();
+            this.SuspendLayout();
+            // 
+            // magasin1
+            // 
+            this.magasin1.BackColor = System.Drawing.SystemColors.InactiveCaption;
+            this.magasin1.Location = new System.Drawing.Point(1, 0);
+            this.magasin1.Name = "magasin1";
+            this.magasin1.Size = new System.Drawing.Size(800, 450);
+            this.magasin1.TabIndex = 0;
+            this.magasin1.Text = "magasin1";
+            // 
+            // frmSimulationMagasin
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "Form1";
+            this.Controls.Add(this.magasin1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Name = "frmSimulationMagasin";
+            this.Text = "Simulation Magasin";
+            this.ResumeLayout(false);
+
         }
 
         #endregion
+
+        private Magasin magasin1;
     }
 }
 
