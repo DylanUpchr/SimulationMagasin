@@ -17,17 +17,21 @@ namespace WF_SimulationMagasin
         const int WIDTH_MAGASIN = 800;
         const int HEIGHT_MAGASIN = 450;
 
-        private List<Client> ClientsEnMouvement { get; set; }
-        private List<Client> ClientsEnFilAttente { get; set; }
-        private List<Client> ClientsCherchantFilAttente { get; set; }
+        private List<Client> Clients{ get; set; }
         private List<Caisse> Caisses { get; set; }
         private Random Random { get; set; }
+        private Timer t;
 
-        public Magasin()
+        public Magasin() : base()
         {
-            this.ClientsEnMouvement = new List<Client>();
-            this.ClientsEnFilAttente = new List<Client>();
-            this.ClientsCherchantFilAttente = new List<Client>();
+            t = new Timer();
+            t.Interval = 1000 / 60;
+            t.Enabled = true;
+            t.Tick += new EventHandler(OnTick);
+
+            DoubleBuffered = true;
+            
+            this.Clients = new List<Client>();
             this.Caisses = new List<Caisse>();
             this.Random = new Random();
 
@@ -39,12 +43,12 @@ namespace WF_SimulationMagasin
                 Client client = new Client(
                     this.Random.Next(0, WIDTH_MAGASIN - Client.SIZE),
                     this.Random.Next(0, HEIGHT_MAGASIN - Client.SIZE),
-                    this.Random.Next(MAX_SPEED_MULTIPLER),
+                    100, //this.Random.Next(MAX_SPEED_MULTIPLER),
                     tempsAEncaissement,
                     this
                 );
                 Paint += client.Paint;
-                this.ClientsEnMouvement.Add(client);
+                this.Clients.Add(client);
             }
             for (int i = 0; i < NB_CAISSES; i++)
             {
@@ -52,6 +56,12 @@ namespace WF_SimulationMagasin
                 Paint += caisse.Paint;
                 this.Caisses.Add(caisse);
             }
+        }
+
+        private void OnTick(object sender, EventArgs e)
+        {
+            Invalidate(true);
+            Clients.ForEach(client => client.Update());
         }
     }
 }
