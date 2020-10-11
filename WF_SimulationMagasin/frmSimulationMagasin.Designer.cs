@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.magasin1 = new WF_SimulationMagasin.Magasin();
+            this.magasin1 = new WF_SimulationMagasin.Shop();
             this.SuspendLayout();
             // 
             // magasin1
@@ -55,7 +55,7 @@
 
         #endregion
 
-        private Magasin magasin1;
+        private Shop magasin1;
     }
 }
 

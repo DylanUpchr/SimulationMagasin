@@ -21,7 +21,7 @@ namespace WF_SimulationMagasin
 
         public virtual void Paint(object sender, PaintEventArgs e)
         {
-            e.Graphics.FillEllipse(new SolidBrush(Color.Blue), X, Y, Size, Size);
+            e.Graphics.FillEllipse(new SolidBrush(Color.Black), X, Y, Size, Size);
         }
         public virtual void Update()
         {
