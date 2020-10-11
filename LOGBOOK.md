@@ -9,3 +9,11 @@
 ## 2020-10-07
 * Ajout environnement de développement VS Code pour linux
 * Essais de faire bouger sprites Client
+## 2020-10-11
+* Traduction noms variables/classes
+ * Client => Customer
+ * Caisse =Y CheckoutCounter
+ * Magasin => Sprite
+* Etats de client et de caisse
+* Fonction d'ouverture automatique de caisse
+* Mouvement clients dans les bordures du magasin
