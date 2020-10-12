@@ -12,6 +12,7 @@ namespace WF_SimulationMagasin
         const int NB_CHECKOUT_COUNTERS = 7;
         const int NB_CUSTOMERS_PER_COUNTER = 5;
         const int NB_INITIAL_CUSTOMERS = NB_CHECKOUT_COUNTERS * NB_CUSTOMERS_PER_COUNTER;
+        const int MAX_WAIT_TIME = NB_CUSTOMERS_PER_COUNTER * CheckoutCounter.CHECKOUT_DELAY;
         const int MAX_SPEED_MULTIPLER = 150;
         const int MIN_SPEED_MULTIPLER = 75;
         const int MIN_TIME_UNTIL_CHECKOUT_SECONDS = 2;
@@ -71,12 +72,26 @@ namespace WF_SimulationMagasin
             if (
                 Customers.Any(c => c.State == CustomerStates.FindingLine) && 
                 CheckoutCounters.Any(cc => cc.State == CheckoutCounterStates.Closed) &&
-                (CheckoutCounters.Any(cc => cc.State == CheckoutCounterStates.Open && cc.WaitTime >= 30) ||
+                (CheckoutCounters.Any(cc => cc.State == CheckoutCounterStates.Open && cc.WaitTime >= MAX_WAIT_TIME) ||
                 CheckoutCounters.All(cc => cc.State == CheckoutCounterStates.Closed))
                 )
             {
                 CheckoutCounters.Where(cc => cc.State == CheckoutCounterStates.Closed).First().State = CheckoutCounterStates.Open;
             }
+        }
+        public CheckoutCounter GetCheckoutCounterWithShortestLine()
+        {
+            if (CheckoutCounters.Any(cc => cc.State == CheckoutCounterStates.Open && cc.WaitTime < MAX_WAIT_TIME))
+            {
+                return this.CheckoutCounters.Where(cc => cc.State == CheckoutCounterStates.Open && cc.LineLength < NB_CUSTOMERS_PER_COUNTER).OrderBy(cc => cc.WaitTime).FirstOrDefault();
+            } else
+            {
+                return null;
+            }
+        }
+        public void RemoveCustomer(Customer customer)
+        {
+            this.Customers.Remove(customer);
         }
     }
 }
