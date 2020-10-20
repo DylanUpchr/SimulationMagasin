@@ -11,12 +11,12 @@ namespace WF_SimulationMagasin
     {
         const int NB_CHECKOUT_COUNTERS = 7;
         const int NB_CUSTOMERS_PER_COUNTER = 5;
-        const int NB_INITIAL_CUSTOMERS = NB_CHECKOUT_COUNTERS * NB_CUSTOMERS_PER_COUNTER;
-        const int MAX_WAIT_TIME = NB_CUSTOMERS_PER_COUNTER * CheckoutCounter.CHECKOUT_DELAY;
+        const int NB_INITIAL_CUSTOMERS = NB_CHECKOUT_COUNTERS * NB_CUSTOMERS_PER_COUNTER * 2;
+        const int MAX_WAIT_TIME = 3; //NB_CUSTOMERS_PER_COUNTER * CheckoutCounter.CHECKOUT_DELAY;
         const int MAX_SPEED_MULTIPLER = 150;
         const int MIN_SPEED_MULTIPLER = 75;
         const int MIN_TIME_UNTIL_CHECKOUT_SECONDS = 2;
-        const int MAX_TIME_UNTIL_CHECKOUT_SECONDS = 10;
+        const int MAX_TIME_UNTIL_CHECKOUT_SECONDS = 30;
         const int WIDTH_SHOP = 800;
         const int HEIGHT_SHOP = 450;
 
@@ -69,21 +69,30 @@ namespace WF_SimulationMagasin
         }
         private void AutoOpenCheckoutCounters()
         {
+            //AutoOpen
             if (
-                Customers.Any(c => c.State == CustomerStates.FindingLine) && 
+                Customers.Any(c => c.State == CustomerStates.FindingLine) &&
                 CheckoutCounters.Any(cc => cc.State == CheckoutCounterStates.Closed) &&
-                (CheckoutCounters.Any(cc => cc.State == CheckoutCounterStates.Open && cc.WaitTime >= MAX_WAIT_TIME) ||
-                CheckoutCounters.All(cc => cc.State == CheckoutCounterStates.Closed))
+                (CheckoutCounters.All(cc => cc.State == CheckoutCounterStates.Closed) ||
+                Customers.Any(c => c.TimeSpentWaiting.Seconds >= MAX_WAIT_TIME))
                 )
             {
                 CheckoutCounters.Where(cc => cc.State == CheckoutCounterStates.Closed).First().State = CheckoutCounterStates.Open;
             }
+            //AutoClose
+            if (
+                !(Customers.Any(c => c.State == CustomerStates.FindingLine)) && 
+                CheckoutCounters.Any(cc => cc.State == CheckoutCounterStates.Open && cc.EstimatedWaitTime == 0 && cc.LineLength == 0)
+                )
+            {
+                CheckoutCounters.Where(cc => cc.State == CheckoutCounterStates.Open && cc.EstimatedWaitTime == 0 && cc.LineLength == 0).First().State = CheckoutCounterStates.Closed;
+            }
         }
         public CheckoutCounter GetCheckoutCounterWithShortestLine()
         {
-            if (CheckoutCounters.Any(cc => cc.State == CheckoutCounterStates.Open && cc.WaitTime < MAX_WAIT_TIME))
+            if (CheckoutCounters.Any(cc => cc.State == CheckoutCounterStates.Open && cc.LineLength < NB_CUSTOMERS_PER_COUNTER))
             {
-                return this.CheckoutCounters.Where(cc => cc.State == CheckoutCounterStates.Open && cc.LineLength < NB_CUSTOMERS_PER_COUNTER).OrderBy(cc => cc.WaitTime).FirstOrDefault();
+                return this.CheckoutCounters.Where(cc => cc.State == CheckoutCounterStates.Open && cc.LineLength <= NB_CUSTOMERS_PER_COUNTER).OrderBy(cc => cc.EstimatedWaitTime).First();
             } else
             {
                 return null;

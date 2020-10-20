@@ -17,9 +17,10 @@ namespace WF_SimulationMagasin
     {
         public const int SIZE = 40;
         public const int CHECKOUT_DELAY = 6;
+        public const int MAX_WAITING_TIME = 30;
         internal CheckoutCounterStates State;
         public Point LineStart { get { return new Point(this.X - this.Size - LineLength * Customer.SIZE, this.Y + this.Size / 4); } }
-        public int WaitTime { get { return LineLength * CHECKOUT_DELAY; } }
+        public int EstimatedWaitTime { get { return Line.Select(c => c.TimeSpentWaiting.Seconds).DefaultIfEmpty(0).Max(); } }
         public int LineLength { get { return Line.Count; } }
         public List<Customer> Line { get; set; }
         private Timer Timer { get; set; }
@@ -45,7 +46,7 @@ namespace WF_SimulationMagasin
             }
             e.Graphics.FillRectangle(new SolidBrush(rectangleColor), X, Y, Size, Size);
             e.Graphics.DrawString(
-                this.WaitTime.ToString(),
+                this.EstimatedWaitTime.ToString(),
                 new System.Drawing.Font("Arial", 16),
                 new SolidBrush(textColor),
                 this.X + this.Size / 4,

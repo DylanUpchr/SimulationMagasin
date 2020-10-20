@@ -17,3 +17,6 @@
 * Etats de client et de caisse
 * Fonction d'ouverture automatique de caisse
 * Mouvement clients dans les bordures du magasin
+## 2020-10-20
+*Fonction de fermeture et ajustement ouverture automatique de caisse
+*Ajustement comportement client
