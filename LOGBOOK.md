@@ -20,3 +20,8 @@
 ## 2020-10-20
 *Fonction de fermeture et ajustement ouverture automatique de caisse
 *Ajustement comportement client
+## 2020-10-21
+*Changement mouvement client vers caisse de teleportation ä un systeme de déplacement MRU
+## 2020-10-23
+*Ajustement mouvement client
+*Changement condition de fermeture de caisse automatique

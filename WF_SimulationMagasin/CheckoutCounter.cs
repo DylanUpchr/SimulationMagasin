@@ -23,6 +23,7 @@ namespace WF_SimulationMagasin
         public int EstimatedWaitTime { get { return Line.Select(c => c.TimeSpentWaiting.Seconds).DefaultIfEmpty(0).Max(); } }
         public int LineLength { get { return Line.Count; } }
         public List<Customer> Line { get; set; }
+        public int TimeSinceLineEmpty { get; set; }
         private Timer Timer { get; set; }
         public CheckoutCounter(int x, int y, CheckoutCounterStates state)
         {
@@ -31,7 +32,23 @@ namespace WF_SimulationMagasin
             this.Size = SIZE;
             this.State = state;
             this.Line = new List<Customer>();
+            this.Timer = new Timer();
+            this.Timer.Enabled = true;
+            this.Timer.Interval = 1000;
+            this.Timer.Tick += Timer_Tick;
         }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            if (this.State == CheckoutCounterStates.Open && LineLength == 0)
+            {
+                this.TimeSinceLineEmpty++;
+            } else
+            {
+                this.TimeSinceLineEmpty = 0;
+            }
+        }
+
         public override void Paint(object sender, PaintEventArgs e)
         {
             Color rectangleColor, textColor;
@@ -46,7 +63,7 @@ namespace WF_SimulationMagasin
             }
             e.Graphics.FillRectangle(new SolidBrush(rectangleColor), X, Y, Size, Size);
             e.Graphics.DrawString(
-                this.EstimatedWaitTime.ToString(),
+                (this.EstimatedWaitTime > 0 ? this.EstimatedWaitTime.ToString() : "-"),
                 new System.Drawing.Font("Arial", 16),
                 new SolidBrush(textColor),
                 this.X + this.Size / 4,

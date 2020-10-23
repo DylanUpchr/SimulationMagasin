@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Channels;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,7 +25,7 @@ namespace WF_SimulationMagasin
         private Shop Shop { get; set; }
         public CheckoutCounter CheckoutCounter { get; set; }
         public TimeSpan TimeUntilCheckOut { get; set; }
-        public TimeSpan TimeSpentWaiting{ get; set; }
+        public TimeSpan TimeSpentWaiting { get; set; }
         internal CustomerStates State { get; set; }
 
         private Timer t;
@@ -48,14 +49,6 @@ namespace WF_SimulationMagasin
         }
         public override void Update()
         {
-            if (X <= 0 + Size || X >= +Shop.Width - Size)
-            {
-                SpeedX = -SpeedX;
-            }
-            if (Y <= 0 + Size || Y >= Shop.Height - Size)
-            {
-                SpeedY = -SpeedY;
-            }
             if (this.State == CustomerStates.FindingLine || this.State == CustomerStates.GoingToLine)
             {
                 this.CheckoutCounter = Shop.GetCheckoutCounterWithShortestLine();
@@ -63,48 +56,78 @@ namespace WF_SimulationMagasin
                 {
                     this.State = CustomerStates.GoingToLine;
                 }
+                else
+                {
+                    this.State = CustomerStates.FindingLine;
+                }
             }
-            if (this.State == CustomerStates.Browsing || this.State == CustomerStates.FindingLine)
+            if (this.State == CustomerStates.Browsing || this.State == CustomerStates.FindingLine || this.State == CustomerStates.GoingToLine)
             {
-                X += (int)((SpeedX * (Stopwatch.ElapsedMilliseconds - LastRefresh) / 1000f));
-                Y += (int)((SpeedY * (Stopwatch.ElapsedMilliseconds - LastRefresh) / 1000f));
-            }
-            else if (this.State == CustomerStates.GoingToLine)
-            {
-                //Teleport first, put movement later
-                this.X = this.CheckoutCounter.LineStart.X;
-                this.Y = this.CheckoutCounter.LineStart.Y;
+                int xDiff, yDiff, movementX = this.SpeedX, movementY = this.SpeedY;
+                double rateX, rateY;
+                if (this.CheckoutCounter != null)
+                {
+                    xDiff = (this.CheckoutCounter.LineStart.X - this.X);
+                    yDiff = (this.CheckoutCounter.LineStart.Y - this.Y);
+                    rateX = xDiff / Math.Max(yDiff, 1);
+                    rateY = yDiff / Math.Max(xDiff, 1);
+                    movementX = Math.Max(Math.Min((int)(Math.Abs(this.SpeedX) * rateX), Math.Abs(this.SpeedX)), -Math.Abs(this.SpeedX));
+                    movementY = Math.Max(Math.Min((int)(Math.Abs(this.SpeedY) * rateY), Math.Abs(this.SpeedY)), -Math.Abs(this.SpeedY));
 
-                //Check if in line
-                if (this.X == this.CheckoutCounter.LineStart.X && this.Y == this.CheckoutCounter.LineStart.Y)
-                {
-                    this.State = CustomerStates.InLine;
-                    this.CheckoutCounter.Line.Add(this);
-                    this.TimeSpentWaiting = TimeSpan.FromSeconds(0);
+                    //Check if in line
+                    if ((this.X - this.CheckoutCounter.LineStart.X <= 5 && this.X - this.CheckoutCounter.LineStart.X >= -5) &&
+                        (this.Y - this.CheckoutCounter.LineStart.Y <= 5 && this.Y - this.CheckoutCounter.LineStart.Y >= -5))
+                    {
+                        this.X = this.CheckoutCounter.LineStart.X;
+                        this.Y = this.CheckoutCounter.LineStart.Y;
+                        this.State = CustomerStates.InLine;
+                        this.CheckoutCounter.Line.Add(this);
+                        this.TimeSpentWaiting = TimeSpan.FromSeconds(0);
+                    }
                 }
-            } /*else if (this.State == CustomerStates.InLine)
-            {
-                t.Start();
-                /*if (this == this.CheckoutCounter.Line.First() && t.Enabled == false)
+                movementX = (int)((movementX * (Stopwatch.ElapsedMilliseconds - LastRefresh) / 1000f));
+                movementY = (int)((movementY * (Stopwatch.ElapsedMilliseconds - LastRefresh) / 1000f));
+                if (movementX + X >= 0 && movementX + X <= Shop.Width - Size)
                 {
+                    this.X += movementX;
+                } else
+                {
+                    SpeedX = -SpeedX;
                 }
-            }*/
+                if (movementY + Y >= 0 && movementY + Y <= Shop.Height - Size)
+                {
+                    this.Y += movementY;
+                }
+                else
+                {
+                    SpeedY = -SpeedY;
+                }
+            }
             LastRefresh = Stopwatch.ElapsedMilliseconds;
         }
         public override void Paint(object sender, PaintEventArgs e)
         {
             Color ellipseColor, textColor;
+            string text = "";
             switch (this.State)
             {
                 case CustomerStates.Browsing:
                     ellipseColor = Color.Black;
                     textColor = Color.White;
+                    text = this.TimeUntilCheckOut.Seconds.ToString();
                     break;
-                case CustomerStates.FindingLine:
                 case CustomerStates.GoingToLine:
                 case CustomerStates.InLine:
                     ellipseColor = Color.Red;
                     textColor = Color.Transparent;
+                    break;
+                case CustomerStates.FindingLine:
+                    ellipseColor = Color.Red;
+                    textColor = Color.Black;
+                    if (this.TimeSpentWaiting.Seconds > 0)
+                    {
+                        text = this.TimeSpentWaiting.Seconds.ToString();
+                    }
                     break;
                 case CustomerStates.DoneShopping:
                     ellipseColor = Color.Transparent;
@@ -117,7 +140,7 @@ namespace WF_SimulationMagasin
             }
             e.Graphics.FillEllipse(new SolidBrush(ellipseColor), this.X, this.Y, this.Size, this.Size);
             e.Graphics.DrawString(
-                this.TimeUntilCheckOut.Seconds.ToString(),
+                text,
                 new System.Drawing.Font("Arial", 16),
                 new SolidBrush(textColor),
                 this.X + this.Size / 4,
@@ -133,7 +156,9 @@ namespace WF_SimulationMagasin
             else if (this.State == CustomerStates.Browsing)
             {
                 this.State = CustomerStates.FindingLine;
-            } else if (this.State == CustomerStates.InLine && this.TimeSpentWaiting.Seconds >= CheckoutCounter.CHECKOUT_DELAY)
+            }
+
+            if (this.State == CustomerStates.InLine && this.TimeSpentWaiting.Seconds >= CheckoutCounter.CHECKOUT_DELAY)
             {
                 t.Stop();
                 this.CheckoutCounter.Line.Remove(this);
@@ -141,7 +166,8 @@ namespace WF_SimulationMagasin
                 //this.CheckoutCounter.Line.First().TimeSpentWaiting = TimeSpan.FromSeconds(0);
                 this.State = CustomerStates.DoneShopping;
             }
-            if (this.State == CustomerStates.InLine && this.CheckoutCounter.Line.First() == this || this.State == CustomerStates.FindingLine)
+
+            if (this.State == CustomerStates.InLine || this.State == CustomerStates.FindingLine)
             {
                 this.TimeSpentWaiting = this.TimeSpentWaiting.Add(TimeSpan.FromMilliseconds(t.Interval));
             }
