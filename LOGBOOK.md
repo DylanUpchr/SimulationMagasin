@@ -30,4 +30,4 @@
 *Refactorisation du code
 ## 2020-10-25
 *Ajout des libellés dans le form
-*Bugfix (ou8verture/fermeture de caisse)
+*Bugfix (ouverture/fermeture de caisse)
