@@ -1,4 +1,9 @@
-﻿using System;
+﻿/* Author: DU
+ * Desc: Shop component, instances clients and counters, opens and closes counters
+ * Date: 2020-10-24
+ * File: Shop.cs
+ */
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,14 +29,17 @@ namespace WF_SimulationMagasin
         private List<Customer> Customers { get; set; }
         private List<CheckoutCounter> CheckoutCounters { get; set; }
         private Random Random { get; set; }
-        private Timer t;
+        private Timer Timer { get; set; }
 
+        /// <summary>
+        /// Shop constructor
+        /// </summary>
         public Shop() : base()
         {
-            t = new Timer();
-            t.Interval = 1000 / 60;
-            t.Enabled = true;
-            t.Tick += new EventHandler(OnTick);
+            Timer = new Timer();
+            Timer.Interval = 1000 / 60;
+            Timer.Enabled = true;
+            Timer.Tick += OnTick;
 
             DoubleBuffered = true;
 
@@ -39,6 +47,7 @@ namespace WF_SimulationMagasin
             this.CheckoutCounters = new List<CheckoutCounter>();
             this.Random = new Random();
 
+            //Instance customers
             for (int i = 0; i < NB_INITIAL_CUSTOMERS; i++)
             {
                 TimeSpan timeUntilCheckout = new TimeSpan(
@@ -54,22 +63,34 @@ namespace WF_SimulationMagasin
                 Paint += customer.Paint;
                 this.Customers.Add(customer);
             }
+            //Instance checkout counters
             for (int i = 0; i < NB_CHECKOUT_COUNTERS; i++)
             {
-                CheckoutCounter checkoutCounter = new CheckoutCounter(WIDTH_SHOP - CheckoutCounter.SIZE, i * 50, CheckoutCounterStates.Closed);
+                CheckoutCounter checkoutCounter = new CheckoutCounter(WIDTH_SHOP - CheckoutCounter.SIZE, i * 50);
                 Paint += checkoutCounter.Paint;
                 this.CheckoutCounters.Add(checkoutCounter);
             }
         }
+        /// <summary>
+        /// Redraw shop, update customers and open/close checkout counters
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnTick(object sender, EventArgs e)
         {
             Invalidate(true);
             Customers.ForEach(customer => customer.Update());
-            AutoOpenCheckoutCounters();
+            ManageCheckoutCounters();
         }
-        private void AutoOpenCheckoutCounters()
+        /// <summary>
+        /// Open or close counters automatically
+        /// </summary>
+        private void ManageCheckoutCounters()
         {
-            //AutoOpen
+            //AutoOpen logic
+            //If any customer finding a line
+            //And any close counters
+            //Either all counters closed or any customershave been waiting longer than MAX_WAIT_TIME 
             if (
                 Customers.Any(c => c.State == CustomerStates.FindingLine) &&
                 CheckoutCounters.Any(cc => cc.State == CheckoutCounterStates.Closed) &&
@@ -79,26 +100,38 @@ namespace WF_SimulationMagasin
             {
                 CheckoutCounters.Where(cc => cc.State == CheckoutCounterStates.Closed).First().State = CheckoutCounterStates.Open;
             }
-            //AutoClose
+            //AutoClose logic
+            //If there are not any customers finding a line
+            //And any checkout counters open
+            //And line empty for NB_SECONDS_BEFORE_COUNTER_CLOSES
             if (
                 !(Customers.Any(c => c.State == CustomerStates.FindingLine)) &&
-                CheckoutCounters.Any(cc => cc.State == CheckoutCounterStates.Open && cc.TimeSinceLineEmpty >= NB_SECONDS_BEFORE_COUNTER_CLOSES && cc.LineLength == 0)
+                CheckoutCounters.Any(cc => cc.State == CheckoutCounterStates.Open && 
+                cc.TimeSinceLineEmpty >= NB_SECONDS_BEFORE_COUNTER_CLOSES)
                 )
             {
-                CheckoutCounters.Where(cc => cc.State == CheckoutCounterStates.Open && cc.TimeSinceLineEmpty >= NB_SECONDS_BEFORE_COUNTER_CLOSES && cc.LineLength == 0).First().State = CheckoutCounterStates.Closed;
+                CheckoutCounters.Where(cc => cc.State == CheckoutCounterStates.Open && cc.TimeSinceLineEmpty >= NB_SECONDS_BEFORE_COUNTER_CLOSES).First().State = CheckoutCounterStates.Closed;
             }
         }
+        /// <summary>
+        /// Finds checkout counter with shortest line
+        /// </summary>
+        /// <returns>Checkout counter</returns>
         public CheckoutCounter GetCheckoutCounterWithShortestLine()
         {
             if (CheckoutCounters.Any(cc => cc.State == CheckoutCounterStates.Open && cc.LineLength < NB_CUSTOMERS_PER_COUNTER))
             {
-                return this.CheckoutCounters.Where(cc => cc.State == CheckoutCounterStates.Open && cc.LineLength < NB_CUSTOMERS_PER_COUNTER).OrderBy(cc => cc.EstimatedWaitTime).First();
+                return this.CheckoutCounters.Where(cc => cc.State == CheckoutCounterStates.Open && cc.LineLength < NB_CUSTOMERS_PER_COUNTER).OrderBy(cc => cc.HighestWaitTime).First();
             }
             else
             {
                 return null;
             }
         }
+        /// <summary>
+        /// Remove customer that is done shopping from list
+        /// </summary>
+        /// <param name="customer"></param>
         public void RemoveCustomer(Customer customer)
         {
             this.Customers.Remove(customer);

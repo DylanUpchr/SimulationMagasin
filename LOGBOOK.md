@@ -25,3 +25,6 @@
 ## 2020-10-23
 *Ajustement mouvement client
 *Changement condition de fermeture de caisse automatique
+## 2020-10-24
+*Commentaires code
+*Refactorisation du code

@@ -1,4 +1,9 @@
-﻿using System;
+﻿/* Author: DU
+ * Desc: Customer sprite, controls customer movement
+ * Date: 2020-10-24
+ * File: Customer.cs
+ */
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -21,20 +26,27 @@ namespace WF_SimulationMagasin
     }
     class Customer : Sprite
     {
-        public const int SIZE = 40;
-        private Shop Shop { get; set; }
-        public CheckoutCounter CheckoutCounter { get; set; }
-        public TimeSpan TimeUntilCheckOut { get; set; }
-        public TimeSpan TimeSpentWaiting { get; set; }
-        internal CustomerStates State { get; set; }
-
-        private Timer t;
+        public const int SIZE = 40; //Size default
+        private Shop Shop { get; set; } //Parent shop
+        public CheckoutCounter CheckoutCounter { get; set; } //Checkout counter that the customer is at/wants to go to
+        public TimeSpan TimeUntilCheckOut { get; set; } //Time until customer starts looking for a checkout counter
+        public TimeSpan TimeSpentWaiting { get; set; } //How much time the customer has been waiting for a line/to checkout
+        internal CustomerStates State { get; set; } //Current state
+        private Timer Timer { get; set; }
+        /// <summary>
+        /// Customer constructor
+        /// </summary>
+        /// <param name="startX">Initial horizontal position</param>
+        /// <param name="startY">Initial vertical position</param>
+        /// <param name="speed">Initial speed</param>
+        /// <param name="timeUntilCheckout">Numbger of seconds before checkout</param>
+        /// <param name="shop">Parent shop</param>
         public Customer(int startX, int startY, int speed, TimeSpan timeUntilCheckout, Shop shop)
         {
-            t = new Timer();
-            t.Interval = 1000;
-            t.Tick += new EventHandler(OnTick);
-            t.Enabled = true;
+            Timer = new Timer();
+            Timer.Interval = 1000;
+            Timer.Tick += new EventHandler(OnTick);
+            Timer.Enabled = true;
             Stopwatch = new Stopwatch();
             Stopwatch.Start();
             this.X = startX;
@@ -47,6 +59,9 @@ namespace WF_SimulationMagasin
             this.State = CustomerStates.Browsing;
 
         }
+        /// <summary>
+        /// Move sprite based on speed and time since last movement and change customer states
+        /// </summary>
         public override void Update()
         {
             if (this.State == CustomerStates.FindingLine || this.State == CustomerStates.GoingToLine)
@@ -61,6 +76,7 @@ namespace WF_SimulationMagasin
                     this.State = CustomerStates.FindingLine;
                 }
             }
+            //Calculate horizontal and vertical speed to go straight to checkout line start
             if (this.State == CustomerStates.Browsing || this.State == CustomerStates.FindingLine || this.State == CustomerStates.GoingToLine)
             {
                 int xDiff, yDiff, movementX = this.SpeedX, movementY = this.SpeedY;
@@ -85,8 +101,10 @@ namespace WF_SimulationMagasin
                         this.TimeSpentWaiting = TimeSpan.FromSeconds(0);
                     }
                 }
+                //Calculate pixels to move
                 movementX = (int)((movementX * (Stopwatch.ElapsedMilliseconds - LastRefresh) / 1000f));
                 movementY = (int)((movementY * (Stopwatch.ElapsedMilliseconds - LastRefresh) / 1000f));
+                //If the desired movement isn't out of bounds move, otherwise invert speed
                 if (movementX + X >= 0 && movementX + X <= Shop.Width - Size)
                 {
                     this.X += movementX;
@@ -105,6 +123,11 @@ namespace WF_SimulationMagasin
             }
             LastRefresh = Stopwatch.ElapsedMilliseconds;
         }
+        /// <summary>
+        /// Draw client based on state
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public override void Paint(object sender, PaintEventArgs e)
         {
             Color ellipseColor, textColor;
@@ -147,11 +170,16 @@ namespace WF_SimulationMagasin
                 this.Y + this.Size / 4
                 );
         }
+        /// <summary>
+        /// Handle time based state changes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void OnTick(object sender, EventArgs e)
         {
             if (this.State == CustomerStates.Browsing && this.TimeUntilCheckOut.Seconds > 0)
             {
-                this.TimeUntilCheckOut = this.TimeUntilCheckOut.Subtract(TimeSpan.FromMilliseconds(t.Interval));
+                this.TimeUntilCheckOut = this.TimeUntilCheckOut.Subtract(TimeSpan.FromMilliseconds(Timer.Interval));
             }
             else if (this.State == CustomerStates.Browsing)
             {
@@ -160,16 +188,16 @@ namespace WF_SimulationMagasin
 
             if (this.State == CustomerStates.InLine && this.TimeSpentWaiting.Seconds >= CheckoutCounter.CHECKOUT_DELAY)
             {
-                t.Stop();
+                Timer.Stop();
                 this.CheckoutCounter.Line.Remove(this);
+                this.Shop.RemoveCustomer(this);
                 this.CheckoutCounter.Line.ForEach(c => c.X += c.Size);
-                //this.CheckoutCounter.Line.First().TimeSpentWaiting = TimeSpan.FromSeconds(0);
                 this.State = CustomerStates.DoneShopping;
             }
 
             if (this.State == CustomerStates.InLine || this.State == CustomerStates.FindingLine)
             {
-                this.TimeSpentWaiting = this.TimeSpentWaiting.Add(TimeSpan.FromMilliseconds(t.Interval));
+                this.TimeSpentWaiting = this.TimeSpentWaiting.Add(TimeSpan.FromMilliseconds(Timer.Interval));
             }
         }
     }

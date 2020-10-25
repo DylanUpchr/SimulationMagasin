@@ -1,4 +1,9 @@
-﻿using System;
+﻿/* Author: DU
+ * Desc: Checkout counter sprite
+ * Date: 2020-10-24
+ * File: CheckoutCounter.cs
+ */
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -15,30 +20,38 @@ namespace WF_SimulationMagasin
     }
     class CheckoutCounter : Sprite
     {
-        public const int SIZE = 40;
-        public const int CHECKOUT_DELAY = 6;
-        public const int MAX_WAITING_TIME = 30;
-        internal CheckoutCounterStates State;
-        public Point LineStart { get { return new Point(this.X - this.Size - LineLength * Customer.SIZE, this.Y + this.Size / 4); } }
-        public int EstimatedWaitTime { get { return Line.Select(c => c.TimeSpentWaiting.Seconds).DefaultIfEmpty(0).Max(); } }
-        public int LineLength { get { return Line.Count; } }
-        public List<Customer> Line { get; set; }
-        public int TimeSinceLineEmpty { get; set; }
+        public const int SIZE = 40; //Sprite size
+        public const int CHECKOUT_DELAY = 6; //Time it takes for customers to checkout
+
+        internal CheckoutCounterStates State; //Current state
+        public Point LineStart { get { return new Point(this.X - this.Size - LineLength * Customer.SIZE, this.Y + this.Size / 4); } } //Coordinates of start of line, calculated to be behind the last customer in line
+        public int HighestWaitTime { get { return Line.Select(c => c.TimeSpentWaiting.Seconds).DefaultIfEmpty(0).Max(); } } //Highest wait time of custoemrs in line
+        public int LineLength { get { return Line.Count; } } //Number of customers in line at counter
+        public List<Customer> Line { get; set; } //Checkout counter line
+        public int TimeSinceLineEmpty { get; set; } //Number of seconds since the line was empty 
         private Timer Timer { get; set; }
-        public CheckoutCounter(int x, int y, CheckoutCounterStates state)
+        /// <summary>
+        /// Checkout counter constructor
+        /// </summary>
+        /// <param name="x">Horizontal position</param>
+        /// <param name="y">Vertical position</param>
+        public CheckoutCounter(int x, int y)
         {
             this.X = x;
             this.Y = y;
             this.Size = SIZE;
-            this.State = state;
             this.Line = new List<Customer>();
             this.Timer = new Timer();
             this.Timer.Enabled = true;
             this.Timer.Interval = 1000;
-            this.Timer.Tick += Timer_Tick;
+            this.Timer.Tick += OnTick;
         }
-
-        private void Timer_Tick(object sender, EventArgs e)
+        /// <summary>
+        /// Timer tick function, increments or resets TimeSinceLineEmpty
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnTick(object sender, EventArgs e)
         {
             if (this.State == CheckoutCounterStates.Open && LineLength == 0)
             {
@@ -48,7 +61,11 @@ namespace WF_SimulationMagasin
                 this.TimeSinceLineEmpty = 0;
             }
         }
-
+        /// <summary>
+        /// Draws checkout counter
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public override void Paint(object sender, PaintEventArgs e)
         {
             Color rectangleColor, textColor;
@@ -63,7 +80,7 @@ namespace WF_SimulationMagasin
             }
             e.Graphics.FillRectangle(new SolidBrush(rectangleColor), X, Y, Size, Size);
             e.Graphics.DrawString(
-                (this.EstimatedWaitTime > 0 ? this.EstimatedWaitTime.ToString() : "-"),
+                (this.HighestWaitTime > 0 ? this.HighestWaitTime.ToString() : "-"),
                 new System.Drawing.Font("Arial", 16),
                 new SolidBrush(textColor),
                 this.X + this.Size / 4,
