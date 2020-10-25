@@ -28,24 +28,24 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.magasin1 = new WF_SimulationMagasin.Shop();
+            this.shop = new WF_SimulationMagasin.Shop();
             this.SuspendLayout();
             // 
-            // magasin1
+            // shop
             // 
-            this.magasin1.BackColor = System.Drawing.SystemColors.InactiveCaption;
-            this.magasin1.Location = new System.Drawing.Point(1, 0);
-            this.magasin1.Name = "magasin1";
-            this.magasin1.Size = new System.Drawing.Size(800, 450);
-            this.magasin1.TabIndex = 0;
-            this.magasin1.Text = "magasin1";
+            this.shop.BackColor = System.Drawing.SystemColors.InactiveCaption;
+            this.shop.Location = new System.Drawing.Point(1, 0);
+            this.shop.Name = "shop";
+            this.shop.Size = new System.Drawing.Size(800, 450);
+            this.shop.TabIndex = 0;
+            this.shop.Text = "shop";
             // 
             // frmSimulationMagasin
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.magasin1);
+            this.Controls.Add(this.shop);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "frmSimulationMagasin";
             this.Text = "Simulation Magasin";
@@ -55,7 +55,7 @@
 
         #endregion
 
-        private Shop magasin1;
+        private Shop shop;
     }
 }
 

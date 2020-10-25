@@ -5,6 +5,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,6 +43,7 @@ namespace WF_SimulationMagasin
             Timer.Tick += OnTick;
 
             DoubleBuffered = true;
+            Paint += Shop_Paint;
 
             this.Customers = new List<Customer>();
             this.CheckoutCounters = new List<CheckoutCounter>();
@@ -71,6 +73,26 @@ namespace WF_SimulationMagasin
                 this.CheckoutCounters.Add(checkoutCounter);
             }
         }
+
+        private void Shop_Paint(object sender, PaintEventArgs e)
+        {
+            DrawLabel(String.Format("Caisses {0}/{1}", this.CheckoutCounters.Count(cc => cc.State == CheckoutCounterStates.Open), this.CheckoutCounters.Count), 10, 10, e);
+            DrawLabel(String.Format("Temps avant ouverture: {0}s", ""), 10, 30, e);
+            DrawLabel(String.Format("Clients sans caisse: {0}", this.Customers.Count(c => c.State == CustomerStates.FindingLine)), 10, 50, e);
+            DrawLabel(String.Format("Places disponibles: {0}", (this.CheckoutCounters.Count(cc => cc.State == CheckoutCounterStates.Open) * NB_CUSTOMERS_PER_COUNTER - this.CheckoutCounters.Sum(cc => cc.LineLength))), 10, 70, e);
+            //DrawLabel(String.Format("Temps moyen d'attente {0}s", this.Customers.Where(c => c.State == CustomerStates.FindingLine || c.State == CustomerStates.InLine).Average(c => c.TimeSpentWaiting.Seconds)), 10, 90, e);
+            //DrawLabel(String.Format("Heure"), 10, 10, e);
+        }
+        private void DrawLabel(string text, int x, int y, PaintEventArgs e)
+        {
+            Font font = new Font("Arial", 11);
+            Point point = new Point(x, y);
+            SizeF size = e.Graphics.MeasureString(text, font);
+            Rectangle rectangle = new Rectangle(point, size.ToSize());
+            e.Graphics.FillRectangle(Brushes.White, rectangle);
+            e.Graphics.DrawString(text, font, Brushes.Black, point);
+        }
+
         /// <summary>
         /// Redraw shop, update customers and open/close checkout counters
         /// </summary>
@@ -104,10 +126,12 @@ namespace WF_SimulationMagasin
             //If there are not any customers finding a line
             //And any checkout counters open
             //And line empty for NB_SECONDS_BEFORE_COUNTER_CLOSES
+            //And no customers going to checkout counter
             if (
                 !(Customers.Any(c => c.State == CustomerStates.FindingLine)) &&
                 CheckoutCounters.Any(cc => cc.State == CheckoutCounterStates.Open && 
-                cc.TimeSinceLineEmpty >= NB_SECONDS_BEFORE_COUNTER_CLOSES)
+                cc.TimeSinceLineEmpty >= NB_SECONDS_BEFORE_COUNTER_CLOSES && 
+                !Customers.Any(c => c.CheckoutCounter == cc))
                 )
             {
                 CheckoutCounters.Where(cc => cc.State == CheckoutCounterStates.Open && cc.TimeSinceLineEmpty >= NB_SECONDS_BEFORE_COUNTER_CLOSES).First().State = CheckoutCounterStates.Closed;

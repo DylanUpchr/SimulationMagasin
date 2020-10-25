@@ -45,6 +45,7 @@ namespace WF_SimulationMagasin
             this.Timer.Enabled = true;
             this.Timer.Interval = 1000;
             this.Timer.Tick += OnTick;
+            this.State = CheckoutCounterStates.Closed;
         }
         /// <summary>
         /// Timer tick function, increments or resets TimeSinceLineEmpty
