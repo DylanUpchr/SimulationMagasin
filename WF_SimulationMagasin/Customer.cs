@@ -30,7 +30,8 @@ namespace WF_SimulationMagasin
         private Shop Shop { get; set; } //Parent shop
         public CheckoutCounter CheckoutCounter { get; set; } //Checkout counter that the customer is at/wants to go to
         public TimeSpan TimeUntilCheckOut { get; set; } //Time until customer starts looking for a checkout counter
-        public TimeSpan TimeSpentWaiting { get; set; } //How much time the customer has been waiting for a line/to checkout
+        public TimeSpan TimeSpentWaiting { get; set; } //How much time the customer has been waiting for a line
+        public TimeSpan TimeSpentCheckingOut { get; set; } //How much time the customer has been at the checkout counter
         internal CustomerStates State { get; set; } //Current state
         private Timer Timer { get; set; }
         /// <summary>
@@ -137,7 +138,7 @@ namespace WF_SimulationMagasin
                 case CustomerStates.Browsing:
                     ellipseColor = Color.Black;
                     textColor = Color.White;
-                    text = this.TimeUntilCheckOut.Seconds.ToString();
+                    text = this.TimeUntilCheckOut.TotalSeconds.ToString();
                     break;
                 case CustomerStates.GoingToLine:
                 case CustomerStates.InLine:
@@ -147,9 +148,9 @@ namespace WF_SimulationMagasin
                 case CustomerStates.FindingLine:
                     ellipseColor = Color.Red;
                     textColor = Color.Black;
-                    if (this.TimeSpentWaiting.Seconds > 0)
+                    if (this.TimeSpentWaiting.TotalSeconds > 0)
                     {
-                        text = this.TimeSpentWaiting.Seconds.ToString();
+                        text = this.TimeSpentWaiting.TotalSeconds.ToString();
                     }
                     break;
                 case CustomerStates.DoneShopping:
@@ -177,7 +178,7 @@ namespace WF_SimulationMagasin
         /// <param name="e"></param>
         public void OnTick(object sender, EventArgs e)
         {
-            if (this.State == CustomerStates.Browsing && this.TimeUntilCheckOut.Seconds > 0)
+            if (this.State == CustomerStates.Browsing && this.TimeUntilCheckOut.TotalSeconds > 0)
             {
                 this.TimeUntilCheckOut = this.TimeUntilCheckOut.Subtract(TimeSpan.FromMilliseconds(Timer.Interval));
             }
@@ -186,7 +187,7 @@ namespace WF_SimulationMagasin
                 this.State = CustomerStates.FindingLine;
             }
 
-            if (this.State == CustomerStates.InLine && this.TimeSpentWaiting.Seconds >= CheckoutCounter.CHECKOUT_DELAY)
+            if (this.State == CustomerStates.InLine && this.TimeSpentCheckingOut.TotalSeconds >= CheckoutCounter.CHECKOUT_DELAY)
             {
                 Timer.Stop();
                 this.CheckoutCounter.Line.Remove(this);
@@ -198,6 +199,14 @@ namespace WF_SimulationMagasin
             if (this.State == CustomerStates.InLine || this.State == CustomerStates.FindingLine)
             {
                 this.TimeSpentWaiting = this.TimeSpentWaiting.Add(TimeSpan.FromMilliseconds(Timer.Interval));
+            }
+
+            if (this.State == CustomerStates.InLine)
+            {
+                if (this.CheckoutCounter.Line.First() == this)
+                {
+                    this.TimeSpentCheckingOut = this.TimeSpentCheckingOut.Add(TimeSpan.FromMilliseconds(Timer.Interval));
+                }
             }
         }
     }
