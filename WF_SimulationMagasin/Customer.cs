@@ -44,12 +44,12 @@ namespace WF_SimulationMagasin
         /// <param name="shop">Parent shop</param>
         public Customer(int startX, int startY, int speed, TimeSpan timeUntilCheckout, Shop shop)
         {
-            Timer = new Timer();
-            Timer.Interval = 1000;
-            Timer.Tick += new EventHandler(OnTick);
-            Timer.Enabled = true;
-            Stopwatch = new Stopwatch();
-            Stopwatch.Start();
+            this.Timer = new Timer();
+            this.Timer.Interval = 1000;
+            this.Timer.Tick += new EventHandler(OnTick);
+            this.Timer.Enabled = true;
+            this.Stopwatch = new Stopwatch();
+            this.Stopwatch.Start();
             this.X = startX;
             this.Y = startY;
             this.SpeedX = speed;

@@ -16,11 +16,11 @@ namespace WF_SimulationMagasin
     class Shop : Control
     {
         const int FPS = 120;
-        const double TIME_SPEED = 1;
+        public const double TIME_SPEED = 1;
         const double TIME_ADD = 1 * TIME_SPEED / FPS;
         const int OPENING_TIME = 8;
         const int CLOSING_TIME = 19;
-        const int NB_CHECKOUT_COUNTERS = 7;
+        const int NB_CHECKOUT_COUNTERS = 8;
         const int NB_CUSTOMERS_PER_COUNTER = 5;
         const int NB_INITIAL_CUSTOMERS = NB_CHECKOUT_COUNTERS * NB_CUSTOMERS_PER_COUNTER;
         const int MAX_WAIT_TIME = 5;
@@ -55,6 +55,7 @@ namespace WF_SimulationMagasin
             this.CheckoutCounters = new List<CheckoutCounter>();
             this.Random = new Random();
             this.Time = DateTime.Now;
+            this.Time = new DateTime(1970, 1, 1, OPENING_TIME, 0, 0);
             //Instance checkout counters
             for (int i = 0; i < NB_CHECKOUT_COUNTERS; i++)
             {
@@ -91,7 +92,7 @@ namespace WF_SimulationMagasin
 
             DrawLabel(String.Format("Caisses {0}/{1}", nbCheckoutCounters, this.CheckoutCounters.Count), 10, 10, e);
             DrawLabel(String.Format("Temps avant ouverture: {0}s", nbSecondsBeforCounterOpen), 10, 30, e);
-            DrawLabel(String.Format("Clients sans caisse: {0}", nbCustomersWOCounter), 10, 50, e);
+            DrawLabel(String.Format("Clients sans caisse: {0}/{1}", nbCustomersWOCounter, Customers.Count), 10, 50, e);
             DrawLabel(String.Format("Places disponibles: {0}", nbAvailableSpots), 10, 70, e);
             DrawLabel(String.Format("Temps moyen d'attente {0}s", avgWaitSeconds), 10, 90, e);
             DrawLabel(String.Format("Heure {0}", this.Time.ToString("H:mm")), 10, 110, e);
@@ -157,7 +158,7 @@ namespace WF_SimulationMagasin
             int desiredNbCustomers, nbCustomers;
             if (this.Time.Hour >= OPENING_TIME && this.Time.Hour <= CLOSING_TIME)
             {
-                desiredNbCustomers = NB_INITIAL_CUSTOMERS;
+                desiredNbCustomers = NB_INITIAL_CUSTOMERS - (Math.Abs(this.Time.Hour - 12) * 8);
             }
             else
             {
