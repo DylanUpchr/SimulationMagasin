@@ -18,16 +18,20 @@
 * Fonction d'ouverture automatique de caisse
 * Mouvement clients dans les bordures du magasin
 ## 2020-10-20
-*Fonction de fermeture et ajustement ouverture automatique de caisse
-*Ajustement comportement client
+* Fonction de fermeture et ajustement ouverture automatique de caisse
+* Ajustement comportement client
 ## 2020-10-21
-*Changement mouvement client vers caisse de teleportation ä un systeme de déplacement MRU
+* Changement mouvement client vers caisse de teleportation ä un systeme de déplacement MRU
 ## 2020-10-23
-*Ajustement mouvement client
-*Changement condition de fermeture de caisse automatique
+* Ajustement mouvement client
+* Changement condition de fermeture de caisse automatique
 ## 2020-10-24
-*Commentaires code
-*Refactorisation du code
+* Commentaires code
+* Refactorisation du code
 ## 2020-10-25
-*Ajout des libellés dans le form
-*Bugfix (ouverture/fermeture de caisse)
+* Ajout des libellés dans le form
+* Bugfix (ouverture/fermeture de caisse)
+## 2020-10-25
+* Système d'heures d'affluence
+* Amélioré forme des queues
+* Commentaires code
