@@ -83,16 +83,20 @@ namespace WF_SimulationMagasin
                 double rateX, rateY;
                 if (this.CheckoutCounter != null)
                 {
+                    //Difference between customer position and LineStart
                     xDiff = (this.CheckoutCounter.LineStart.X - this.X);
                     yDiff = (this.CheckoutCounter.LineStart.Y - this.Y);
+                    //Ratio of xDiff and yDiff to get rate at which customer moves towards the point
+                    //Both rates control the angle of the customers movement
                     rateX = xDiff / Math.Max(yDiff, 1);
                     rateY = yDiff / Math.Max(xDiff, 1);
+                    //Calculate how fast to move in each axis
                     movementX = Math.Max(Math.Min((int)(Math.Abs(this.SpeedX) * rateX), Math.Abs(this.SpeedX)), -Math.Abs(this.SpeedX));
                     movementY = Math.Max(Math.Min((int)(Math.Abs(this.SpeedY) * rateY), Math.Abs(this.SpeedY)), -Math.Abs(this.SpeedY));
 
                     //Check if in line
-                    if ((this.X - this.CheckoutCounter.LineStart.X <= 5 && this.X - this.CheckoutCounter.LineStart.X >= -5) &&
-                        (this.Y - this.CheckoutCounter.LineStart.Y <= 5 && this.Y - this.CheckoutCounter.LineStart.Y >= -5))
+                    if ((this.X == this.CheckoutCounter.LineStart.X) &&
+                        (this.Y == this.CheckoutCounter.LineStart.Y))
                     {
                         this.X = this.CheckoutCounter.LineStart.X;
                         this.Y = this.CheckoutCounter.LineStart.Y;
