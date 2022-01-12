@@ -20,7 +20,7 @@ namespace WF_SimulationMagasin
         const double TIME_ADD = 1 * TIME_SPEED / FPS;
         const int OPENING_TIME = 8;
         const int CLOSING_TIME = 19;
-        const int NB_CHECKOUT_COUNTERS = 8;
+        const int NB_CHECKOUT_COUNTERS = 13;
         const int NB_CUSTOMERS_PER_COUNTER = 5;
         const int NB_INITIAL_CUSTOMERS = NB_CHECKOUT_COUNTERS * NB_CUSTOMERS_PER_COUNTER;
         const int MAX_WAIT_TIME = 5;
@@ -59,7 +59,7 @@ namespace WF_SimulationMagasin
             //Instance checkout counters
             for (int i = 0; i < NB_CHECKOUT_COUNTERS; i++)
             {
-                CheckoutCounter checkoutCounter = new CheckoutCounter(WIDTH_SHOP - CheckoutCounter.SIZE, i * 50);
+                CheckoutCounter checkoutCounter = new CheckoutCounter(i * 50, HEIGHT_SHOP - CheckoutCounter.SIZE);
                 Paint += checkoutCounter.Paint;
                 this.CheckoutCounters.Add(checkoutCounter);
             }
