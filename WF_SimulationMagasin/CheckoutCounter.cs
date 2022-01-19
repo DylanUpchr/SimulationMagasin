@@ -24,7 +24,7 @@ namespace WF_SimulationMagasin
         public const int CHECKOUT_DELAY = 6; //Time it takes for customers to checkout
 
         internal CheckoutCounterStates State; //Current state
-        public Point LineStart { get { return new Point(this.X + this.Size / 4, this.Y - this.Size - LineLength * Customer.SIZE); } } //Coordinates of start of line, calculated to be behind the last customer in line
+        public Point LineStart { get { return new Point(this.X, this.Y - this.Size - LineLength * Customer.SIZE); } } //Coordinates of start of line, calculated to be behind the last customer in line
         public int HighestWaitTime { get { return Line.Select(c => (int)c.TimeSpentWaiting.TotalSeconds).DefaultIfEmpty(0).Max(); } } //Highest wait time of custoemrs in line
         public int LineLength { get { return Line.Count; } } //Number of customers in line at counter
         public List<Customer> Line { get; set; } //Checkout counter line

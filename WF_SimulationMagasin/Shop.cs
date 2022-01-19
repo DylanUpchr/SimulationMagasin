@@ -29,8 +29,9 @@ namespace WF_SimulationMagasin
         const int MIN_SPEED_MULTIPLER = 75 * (int)TIME_SPEED;
         const int MIN_TIME_UNTIL_CHECKOUT_SECONDS = 2;
         const int MAX_TIME_UNTIL_CHECKOUT_SECONDS = 30;
-        const int WIDTH_SHOP = 800;
-        const int HEIGHT_SHOP = 450;
+        const int WIDTH_SHOP = 930;
+        const int HEIGHT_SHOP = 600;
+        readonly int[] NB_CLIENT_PAR_HEURE = {0,0,0,0,0,0,0,30,30,40,50,60,100,80,50,30,80,100,50,50,80,0,0,0};
 
         private List<Customer> Customers { get; set; }
         private List<CheckoutCounter> CheckoutCounters { get; set; }

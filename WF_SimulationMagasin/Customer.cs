@@ -196,7 +196,7 @@ namespace WF_SimulationMagasin
                 Timer.Stop();
                 this.CheckoutCounter.Line.Remove(this);
                 this.Shop.RemoveCustomer(this);
-                this.CheckoutCounter.Line.ForEach(c => c.X += c.Size);
+                this.CheckoutCounter.Line.ForEach(c => c.Y += c.Size);
                 this.State = CustomerStates.DoneShopping;
             }
 
