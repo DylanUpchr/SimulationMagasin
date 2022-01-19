@@ -91,12 +91,12 @@ namespace WF_SimulationMagasin
             nbAvailableSpots = (this.CheckoutCounters.Count(cc => cc.State == CheckoutCounterStates.Open) * NB_CUSTOMERS_PER_COUNTER - this.CheckoutCounters.Sum(cc => cc.LineLength));
 
 
-            DrawLabel(String.Format("Caisses {0}/{1}", nbCheckoutCounters, this.CheckoutCounters.Count), 10, 10, e);
-            DrawLabel(String.Format("Temps avant ouverture: {0}s", nbSecondsBeforCounterOpen), 10, 30, e);
-            DrawLabel(String.Format("Clients sans caisse: {0}/{1}", nbCustomersWOCounter, Customers.Count), 10, 50, e);
-            DrawLabel(String.Format("Places disponibles: {0}", nbAvailableSpots), 10, 70, e);
-            DrawLabel(String.Format("Temps moyen d'attente {0}s", avgWaitSeconds), 10, 90, e);
-            DrawLabel(String.Format("Heure {0}", this.Time.ToString("H:mm")), 10, 110, e);
+            DrawLabel(String.Format("Caisses {0}/{1}", nbCheckoutCounters, this.CheckoutCounters.Count), this.Size.Width - 200, this.Height - 250, e);
+            DrawLabel(String.Format("Temps avant ouverture: {0}s", nbSecondsBeforCounterOpen), this.Size.Width - 200, this.Height - 230, e);
+            DrawLabel(String.Format("Clients sans caisse: {0}/{1}", nbCustomersWOCounter, Customers.Count), this.Size.Width - 200, this.Height - 210, e);
+            DrawLabel(String.Format("Places disponibles: {0}", nbAvailableSpots), this.Size.Width - 200, this.Height - 190, e);
+            DrawLabel(String.Format("Temps moyen d'attente {0}s", avgWaitSeconds), this.Size.Width - 200, this.Height - 170, e);
+            DrawLabel(String.Format("Heure {0}", this.Time.ToString("H:mm")), this.Size.Width - 200, this.Height - 150, e);
         }
         private void DrawLabel(string text, int x, int y, PaintEventArgs e)
         {
