@@ -57,7 +57,8 @@ namespace WF_SimulationMagasin
             if (this.State == CheckoutCounterStates.Open && LineLength == 0)
             {
                 this.TimeSinceLineEmpty++;
-            } else
+            }
+            else
             {
                 this.TimeSinceLineEmpty = 0;
             }
@@ -74,11 +75,13 @@ namespace WF_SimulationMagasin
             {
                 rectangleColor = Color.Red;
                 textColor = Color.White;
-            } else
+            }
+            else
             {
                 rectangleColor = Color.Green;
                 textColor = Color.Black;
             }
+            e.Graphics.DrawRectangle(new Pen(Color.Black), X, Y - Shop.NB_CUSTOMERS_PER_COUNTER * SIZE, SIZE - 1, Shop.NB_CUSTOMERS_PER_COUNTER * SIZE + 1);
             e.Graphics.FillRectangle(new SolidBrush(rectangleColor), X, Y, Size, Size);
             e.Graphics.DrawString(
                 (this.HighestWaitTime > 0 ? this.HighestWaitTime.ToString() : "-"),

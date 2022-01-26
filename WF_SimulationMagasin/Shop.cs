@@ -15,29 +15,32 @@ namespace WF_SimulationMagasin
 {
     class Shop : Control
     {
-        const int FPS = 120;
+        const int FPS = 100;
         public const double TIME_SPEED = 1;
         const double TIME_ADD = 1 * TIME_SPEED / FPS;
-        const int OPENING_TIME = 8;
-        const int CLOSING_TIME = 19;
+        const int OPENING_TIME = 7;
         const int NB_CHECKOUT_COUNTERS = 13;
-        const int NB_CUSTOMERS_PER_COUNTER = 5;
-        const int NB_INITIAL_CUSTOMERS = NB_CHECKOUT_COUNTERS * NB_CUSTOMERS_PER_COUNTER;
+        public const int NB_CUSTOMERS_PER_COUNTER = 5;
         const int MAX_WAIT_TIME = 5;
         const int NB_SECONDS_BEFORE_COUNTER_CLOSES = 3;
         const int MAX_SPEED_MULTIPLER = 150 * (int)TIME_SPEED;
         const int MIN_SPEED_MULTIPLER = 75 * (int)TIME_SPEED;
-        const int MIN_TIME_UNTIL_CHECKOUT_SECONDS = 2;
-        const int MAX_TIME_UNTIL_CHECKOUT_SECONDS = 30;
+        const int MIN_TIME_UNTIL_CHECKOUT_SECONDS = 5;
+        public const int MAX_TIME_UNTIL_CHECKOUT_SECONDS = 30;
         const int WIDTH_SHOP = 930;
         const int HEIGHT_SHOP = 600;
-        readonly int[] NB_CLIENT_PAR_HEURE = {0,0,0,0,0,0,0,30,30,40,50,60,100,80,50,30,80,100,50,50,80,0,0,0};
+        public const int WIDTH_MOVABLE_AREA = 930;
+        public const int HEIGHT_MOVABLE_AREA = 600 - CheckoutCounter.SIZE * (NB_CUSTOMERS_PER_COUNTER + 1);
+        readonly int[] NB_CUSTOMERS_PER_HOUR = {0,0,0,0,0,0,0,30,30,40,50,60,100,80,50,30,80,100,50,50,80,0,0,0};
 
         private List<Customer> Customers { get; set; }
         private List<CheckoutCounter> CheckoutCounters { get; set; }
         private Random Random { get; set; }
         private Timer Timer { get; set; }
         private DateTime Time { get; set; }
+
+        private Button btnAddClients;
+        private Button btnAddHour;
 
         /// <summary>
         /// Shop constructor
@@ -64,6 +67,32 @@ namespace WF_SimulationMagasin
                 Paint += checkoutCounter.Paint;
                 this.CheckoutCounters.Add(checkoutCounter);
             }
+
+            this.btnAddClients = new Button();
+            this.btnAddHour = new Button();
+            this.Controls.Add(this.btnAddHour);
+            this.Controls.Add(this.btnAddClients);
+
+            // 
+            // btnAddClients
+            // 
+            this.btnAddClients.Location = new System.Drawing.Point(732, 485);
+            this.btnAddClients.Name = "btnAddClients";
+            this.btnAddClients.Size = new System.Drawing.Size(187, 50);
+            this.btnAddClients.TabIndex = 1;
+            this.btnAddClients.Text = "Ajouter 5 clients";
+            this.btnAddClients.UseVisualStyleBackColor = true;
+            this.btnAddClients.Click += Add5Customers;
+            // 
+            // btnAddHour
+            // 
+            this.btnAddHour.Location = new System.Drawing.Point(732, 541);
+            this.btnAddHour.Name = "btnAddHour";
+            this.btnAddHour.Size = new System.Drawing.Size(187, 50);
+            this.btnAddHour.TabIndex = 2;
+            this.btnAddHour.Text = "Ajouter 1H";
+            this.btnAddHour.UseVisualStyleBackColor = true;
+            this.btnAddHour.Click += AddHour;
         }
 
         private void Shop_Paint(object sender, PaintEventArgs e)
@@ -96,7 +125,7 @@ namespace WF_SimulationMagasin
             DrawLabel(String.Format("Clients sans caisse: {0}/{1}", nbCustomersWOCounter, Customers.Count), this.Size.Width - 200, this.Height - 210, e);
             DrawLabel(String.Format("Places disponibles: {0}", nbAvailableSpots), this.Size.Width - 200, this.Height - 190, e);
             DrawLabel(String.Format("Temps moyen d'attente {0}s", avgWaitSeconds), this.Size.Width - 200, this.Height - 170, e);
-            DrawLabel(String.Format("Heure {0}", this.Time.ToString("H:mm")), this.Size.Width - 200, this.Height - 150, e);
+            DrawLabel(String.Format("Heure {0}", this.Time.ToString("HH:mm")), this.Size.Width - 200, this.Height - 150, e);
         }
         private void DrawLabel(string text, int x, int y, PaintEventArgs e)
         {
@@ -157,31 +186,14 @@ namespace WF_SimulationMagasin
         private void SpawnCustomers()
         {
             int desiredNbCustomers, nbCustomers;
-            if (this.Time.Hour >= OPENING_TIME && this.Time.Hour <= CLOSING_TIME)
-            {
-                desiredNbCustomers = NB_INITIAL_CUSTOMERS - (Math.Abs(this.Time.Hour - 12) * 8);
-            }
-            else
-            {
-                desiredNbCustomers = 0;
-            }
+
+            desiredNbCustomers = NB_CUSTOMERS_PER_HOUR[this.Time.Hour];
 
             nbCustomers = desiredNbCustomers - this.Customers.Count;
 
             for (int i = 0; i < nbCustomers; i++)
             {
-                TimeSpan timeUntilCheckout = new TimeSpan(
-                    this.Random.Next(MIN_TIME_UNTIL_CHECKOUT_SECONDS, MAX_TIME_UNTIL_CHECKOUT_SECONDS) * TimeSpan.TicksPerSecond
-                    );
-                Customer customer = new Customer(
-                    this.Random.Next(0, WIDTH_SHOP - Customer.SIZE),
-                    this.Random.Next(0, HEIGHT_SHOP - Customer.SIZE),
-                    this.Random.Next(MIN_SPEED_MULTIPLER, MAX_SPEED_MULTIPLER),
-                    timeUntilCheckout,
-                    this
-                );
-                Paint += customer.Paint;
-                this.Customers.Add(customer);
+                AddCustomer();
             }
         }
         /// <summary>
@@ -206,6 +218,32 @@ namespace WF_SimulationMagasin
         public void RemoveCustomer(Customer customer)
         {
             this.Customers.Remove(customer);
+        }
+        private void AddHour(object sender, EventArgs e)
+        {
+            this.Time = this.Time.Add(new TimeSpan(0, 1, 0, 0));
+        }
+        private void Add5Customers(object sender, EventArgs e)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                AddCustomer();
+            }
+        }
+        private void AddCustomer()
+        {
+            TimeSpan timeUntilCheckout = new TimeSpan(
+                this.Random.Next(MIN_TIME_UNTIL_CHECKOUT_SECONDS, MAX_TIME_UNTIL_CHECKOUT_SECONDS) * TimeSpan.TicksPerSecond
+                );
+            Customer customer = new Customer(
+                this.Random.Next(0, WIDTH_MOVABLE_AREA - Customer.SIZE),
+                this.Random.Next(0, HEIGHT_MOVABLE_AREA - Customer.SIZE),
+                this.Random.Next(MIN_SPEED_MULTIPLER, MAX_SPEED_MULTIPLER),
+                timeUntilCheckout,
+                this
+            );
+            Paint += customer.Paint;
+            this.Customers.Add(customer);
         }
     }
 }

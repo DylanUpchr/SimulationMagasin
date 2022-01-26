@@ -110,14 +110,14 @@ namespace WF_SimulationMagasin
                 movementX = (int)((movementX * (Stopwatch.ElapsedMilliseconds - LastRefresh) / 1000f));
                 movementY = (int)((movementY * (Stopwatch.ElapsedMilliseconds - LastRefresh) / 1000f));
                 //If the desired movement isn't out of bounds move, otherwise invert speed
-                if (movementX + X >= 0 && movementX + X <= Shop.Width - Size)
+                if (movementX + X >= 0 && movementX + X <= (State == CustomerStates.Browsing ? Shop.WIDTH_MOVABLE_AREA : Shop.Width) - Size)
                 {
                     this.X += movementX;
                 } else
                 {
                     SpeedX = -SpeedX;
                 }
-                if (movementY + Y >= 0 && movementY + Y <= Shop.Height - Size)
+                if (movementY + Y >= 0 && movementY + Y <= (State == CustomerStates.Browsing ? Shop.HEIGHT_MOVABLE_AREA : Shop.Height) - Size)
                 {
                     this.Y += movementY;
                 }
@@ -140,8 +140,10 @@ namespace WF_SimulationMagasin
             switch (this.State)
             {
                 case CustomerStates.Browsing:
-                    ellipseColor = Color.Black;
-                    textColor = Color.White;
+                    double intensity = this.TimeUntilCheckOut.TotalSeconds / Shop.MAX_TIME_UNTIL_CHECKOUT_SECONDS;
+                    int color = (int)(255 * intensity);
+                    ellipseColor = Color.FromArgb(color, color, color);
+                    textColor = Color.Red;
                     text = this.TimeUntilCheckOut.TotalSeconds.ToString();
                     break;
                 case CustomerStates.GoingToLine:
