@@ -39,6 +39,10 @@
             this.nudNbSecondsBeforeCounterCloses = new System.Windows.Forms.NumericUpDown();
             this.nudMaxTimeUntilCheckout = new System.Windows.Forms.NumericUpDown();
             this.nudMinTimeUntilCheckout = new System.Windows.Forms.NumericUpDown();
+            this.tbxNbCustomersPerHour = new System.Windows.Forms.TextBox();
+            this.btnSave = new System.Windows.Forms.Button();
+            this.btnCancel = new System.Windows.Forms.Button();
+            this.lblInvalid = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.nudCustomersPerCounter)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudNbCheckoutCounters)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudNbSecondsBeforeCounterCloses)).BeginInit();
@@ -103,43 +107,162 @@
             // nudCustomersPerCounter
             // 
             this.nudCustomersPerCounter.Location = new System.Drawing.Point(237, 7);
+            this.nudCustomersPerCounter.Maximum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.nudCustomersPerCounter.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             this.nudCustomersPerCounter.Name = "nudCustomersPerCounter";
             this.nudCustomersPerCounter.Size = new System.Drawing.Size(52, 20);
             this.nudCustomersPerCounter.TabIndex = 6;
+            this.nudCustomersPerCounter.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             // 
             // nudNbCheckoutCounters
             // 
             this.nudNbCheckoutCounters.Location = new System.Drawing.Point(237, 33);
+            this.nudNbCheckoutCounters.Maximum = new decimal(new int[] {
+            13,
+            0,
+            0,
+            0});
+            this.nudNbCheckoutCounters.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             this.nudNbCheckoutCounters.Name = "nudNbCheckoutCounters";
             this.nudNbCheckoutCounters.Size = new System.Drawing.Size(52, 20);
             this.nudNbCheckoutCounters.TabIndex = 7;
+            this.nudNbCheckoutCounters.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             // 
             // nudNbSecondsBeforeCounterCloses
             // 
             this.nudNbSecondsBeforeCounterCloses.Location = new System.Drawing.Point(237, 111);
+            this.nudNbSecondsBeforeCounterCloses.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.nudNbSecondsBeforeCounterCloses.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             this.nudNbSecondsBeforeCounterCloses.Name = "nudNbSecondsBeforeCounterCloses";
             this.nudNbSecondsBeforeCounterCloses.Size = new System.Drawing.Size(52, 20);
             this.nudNbSecondsBeforeCounterCloses.TabIndex = 8;
+            this.nudNbSecondsBeforeCounterCloses.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             // 
             // nudMaxTimeUntilCheckout
             // 
             this.nudMaxTimeUntilCheckout.Location = new System.Drawing.Point(237, 85);
+            this.nudMaxTimeUntilCheckout.Maximum = new decimal(new int[] {
+            120,
+            0,
+            0,
+            0});
+            this.nudMaxTimeUntilCheckout.Minimum = new decimal(new int[] {
+            20,
+            0,
+            0,
+            0});
             this.nudMaxTimeUntilCheckout.Name = "nudMaxTimeUntilCheckout";
             this.nudMaxTimeUntilCheckout.Size = new System.Drawing.Size(52, 20);
             this.nudMaxTimeUntilCheckout.TabIndex = 9;
+            this.nudMaxTimeUntilCheckout.Value = new decimal(new int[] {
+            20,
+            0,
+            0,
+            0});
             // 
             // nudMinTimeUntilCheckout
             // 
             this.nudMinTimeUntilCheckout.Location = new System.Drawing.Point(237, 59);
+            this.nudMinTimeUntilCheckout.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.nudMinTimeUntilCheckout.Minimum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
             this.nudMinTimeUntilCheckout.Name = "nudMinTimeUntilCheckout";
             this.nudMinTimeUntilCheckout.Size = new System.Drawing.Size(52, 20);
             this.nudMinTimeUntilCheckout.TabIndex = 10;
+            this.nudMinTimeUntilCheckout.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            // 
+            // tbxNbCustomersPerHour
+            // 
+            this.tbxNbCustomersPerHour.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.tbxNbCustomersPerHour.Location = new System.Drawing.Point(18, 168);
+            this.tbxNbCustomersPerHour.Name = "tbxNbCustomersPerHour";
+            this.tbxNbCustomersPerHour.Size = new System.Drawing.Size(450, 20);
+            this.tbxNbCustomersPerHour.TabIndex = 11;
+            this.tbxNbCustomersPerHour.TextChanged += new System.EventHandler(this.ValidateInput);
+            // 
+            // btnSave
+            // 
+            this.btnSave.Location = new System.Drawing.Point(260, 194);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(128, 23);
+            this.btnSave.TabIndex = 12;
+            this.btnSave.Text = "Sauvegarder et quitter";
+            this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            // 
+            // btnCancel
+            // 
+            this.btnCancel.Location = new System.Drawing.Point(394, 194);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnCancel.TabIndex = 13;
+            this.btnCancel.Text = "Annuler";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            // 
+            // lblInvalid
+            // 
+            this.lblInvalid.AutoSize = true;
+            this.lblInvalid.ForeColor = System.Drawing.Color.Red;
+            this.lblInvalid.Location = new System.Drawing.Point(15, 191);
+            this.lblInvalid.Name = "lblInvalid";
+            this.lblInvalid.Size = new System.Drawing.Size(160, 26);
+            this.lblInvalid.TabIndex = 14;
+            this.lblInvalid.Text = "La saisie n\'est pas valide. \r\nFormat: [0, 0, 0 ... 0] (24 valeurs)";
+            this.lblInvalid.Visible = false;
             // 
             // frmParameters
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(584, 361);
+            this.ClientSize = new System.Drawing.Size(481, 228);
+            this.Controls.Add(this.lblInvalid);
+            this.Controls.Add(this.btnCancel);
+            this.Controls.Add(this.btnSave);
+            this.Controls.Add(this.tbxNbCustomersPerHour);
             this.Controls.Add(this.nudMinTimeUntilCheckout);
             this.Controls.Add(this.nudMaxTimeUntilCheckout);
             this.Controls.Add(this.nudNbSecondsBeforeCounterCloses);
@@ -176,5 +299,9 @@
         private System.Windows.Forms.NumericUpDown nudNbSecondsBeforeCounterCloses;
         private System.Windows.Forms.NumericUpDown nudMaxTimeUntilCheckout;
         private System.Windows.Forms.NumericUpDown nudMinTimeUntilCheckout;
+        private System.Windows.Forms.TextBox tbxNbCustomersPerHour;
+        private System.Windows.Forms.Button btnSave;
+        private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.Label lblInvalid;
     }
 }

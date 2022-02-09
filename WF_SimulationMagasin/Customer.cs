@@ -99,8 +99,8 @@ namespace WF_SimulationMagasin
                     if ((this.X == this.CheckoutCounter.LineStart.X) &&
                         (this.Y == this.CheckoutCounter.LineStart.Y))
                     {
-                        this.X = this.CheckoutCounter.LineStart.X;
-                        this.Y = this.CheckoutCounter.LineStart.Y;
+                        /*this.X = this.CheckoutCounter.LineStart.X;
+                        this.Y = this.CheckoutCounter.LineStart.Y;*/
                         this.State = CustomerStates.InLine;
                         this.CheckoutCounter.Line.Add(this);
                         this.TimeSpentWaiting = TimeSpan.FromSeconds(0);
