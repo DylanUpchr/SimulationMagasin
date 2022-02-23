@@ -19,6 +19,10 @@ namespace WF_SimulationMagasin
             this.Config = shopConfig;
             LoadSettings(this.Config);
         }
+        /// <summary>
+        /// Load settings into interface from shopConfig
+        /// </summary>
+        /// <param name="shopConfig">Shop configuration</param>
         private void LoadSettings(ShopConfig shopConfig)
         {
             this.nudCustomersPerCounter.Value = shopConfig.NbCustomersPerCounter;
@@ -28,6 +32,10 @@ namespace WF_SimulationMagasin
             this.nudNbSecondsBeforeCounterCloses.Value = shopConfig.NbSecondsBeforeCounterCloses;
             this.tbxNbCustomersPerHour.Text = IntArrayToString(shopConfig.NbCustomersPerHour);
         }
+        /// <summary>
+        /// Save entered data to shopConfig
+        /// </summary>
+        /// <param name="shopConfig">Shop configuration</param>
         private void SaveSettings(ShopConfig shopConfig)
         {
             shopConfig.NbCustomersPerCounter = (int)this.nudCustomersPerCounter.Value;
@@ -41,6 +49,11 @@ namespace WF_SimulationMagasin
                 shopConfig.NbCustomersPerHour = newValue;
             }
         }
+        /// <summary>
+        /// Transform int array to string
+        /// </summary>
+        /// <param name="array">Int array</param>
+        /// <returns>int array in string format</returns>
         private string IntArrayToString(int[] array)
         {
             string result = "[";
@@ -61,6 +74,11 @@ namespace WF_SimulationMagasin
 
             return result;
         }
+        /// <summary>
+        /// Transform string to int array
+        /// </summary>
+        /// <param name="input">string</param>
+        /// <returns>int array</returns>
         private int[] StringToIntArray(string input)
         {
             Regex r2 = new Regex("[\\d]+");
@@ -85,6 +103,11 @@ namespace WF_SimulationMagasin
             SaveSettings(this.Config);
             this.Close();
         }
+        /// <summary>
+        /// Validate form of user entered data
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ValidateInput(object sender, EventArgs e)
         {
             Regex r1 = new Regex(@"\[(\d+\,\s){23}\d\]");

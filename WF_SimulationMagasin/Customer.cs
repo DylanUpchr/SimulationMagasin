@@ -48,8 +48,6 @@ namespace WF_SimulationMagasin
             this.Timer.Interval = 1000;
             this.Timer.Tick += new EventHandler(OnTick);
             this.Timer.Enabled = true;
-            /*this.Stopwatch = new Stopwatch();
-            this.Stopwatch.Start();*/
             this.X = startX;
             this.Y = startY;
             this.SpeedX = speed;
@@ -100,8 +98,6 @@ namespace WF_SimulationMagasin
                     if ((this.X == this.CheckoutCounter.LineStart.X) &&
                         (this.Y == this.CheckoutCounter.LineStart.Y))
                     {
-                        /*this.X = this.CheckoutCounter.LineStart.X;
-                        this.Y = this.CheckoutCounter.LineStart.Y;*/
                         this.State = CustomerStates.InLine;
                         this.CheckoutCounter.Line.Add(this);
                         this.TimeSpentWaiting = TimeSpan.FromSeconds(0);
