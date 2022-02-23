@@ -21,11 +21,10 @@ namespace WF_SimulationMagasin
     class CheckoutCounter : Sprite
     {
         public const int SIZE = 40; //Sprite size
-        public const int CHECKOUT_DELAY = 6; //Time it takes for customers to checkout
 
         internal CheckoutCounterStates State; //Current state
         public Point LineStart { get { return new Point(this.X, this.Y - this.Size - LineLength * Customer.SIZE); } } //Coordinates of start of line, calculated to be behind the last customer in line
-        public int TimeUntilNextCustomerLeaves { get { return (Line.Count > 0 ? CHECKOUT_DELAY - Line.First().TimeSpentCheckingOut.Seconds : 0); } }
+        public int TimeUntilNextCustomerLeaves { get { return (Line.Count > 0 ? (int)(Line.First().TimeSpentCheckingOut.TotalSeconds - Line.First().TimeForCheckOut.TotalSeconds) : 0); } }
         public int LineLength { get { return Line.Count; } } //Number of customers in line at counter
         public List<Customer> Line { get; set; } //Checkout counter line
         public int TimeSinceLineEmpty { get; set; } //Number of seconds since the line was empty 
@@ -88,7 +87,7 @@ namespace WF_SimulationMagasin
                 new SolidBrush(textColor),
                 this.X + this.Size / 4,
                 this.Y + this.Size / 4
-                );
+            );
         }
     }
 }

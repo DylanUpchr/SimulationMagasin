@@ -32,6 +32,7 @@ namespace WF_SimulationMagasin
         public TimeSpan TimeUntilCheckOut { get; set; } //Time until customer starts looking for a checkout counter
         public TimeSpan TimeSpentWaiting { get; set; } //How much time the customer has been waiting for a line
         public TimeSpan TimeSpentCheckingOut { get; set; } //How much time the customer has been at the checkout counter
+        public TimeSpan TimeForCheckOut { get; set; } //How much time the customer will be at the checkout counter
         internal CustomerStates State { get; set; } //Current state
         /// <summary>
         /// Customer constructor
@@ -54,6 +55,7 @@ namespace WF_SimulationMagasin
             this.SpeedX = speed;
             this.SpeedY = speed;
             this.TimeUntilCheckOut = timeUntilCheckout;
+            this.TimeForCheckOut = TimeSpan.FromSeconds(timeUntilCheckout.TotalSeconds / 5);
             this.Shop = shop;
             this.Size = SIZE;
             this.State = CustomerStates.Browsing;
@@ -191,7 +193,7 @@ namespace WF_SimulationMagasin
                 this.State = CustomerStates.FindingLine;
             }
 
-            if (this.State == CustomerStates.InLine && this.TimeSpentCheckingOut.TotalSeconds >= CheckoutCounter.CHECKOUT_DELAY)
+            if (this.State == CustomerStates.InLine && this.TimeSpentCheckingOut.TotalSeconds >= this.TimeForCheckOut.TotalSeconds)
             {
                 Timer.Stop();
                 this.CheckoutCounter.Line.Remove(this);
