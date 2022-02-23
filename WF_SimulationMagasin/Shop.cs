@@ -5,6 +5,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -24,6 +25,7 @@ namespace WF_SimulationMagasin
         const int MIN_SPEED_MULTIPLER = 75 * (int)TIME_SPEED;
         const int WIDTH_SHOP = 930;
         const int HEIGHT_SHOP = 600;
+        const bool START_SIMULATION_ON_STARTUP = true;
         public const int X_START_MOVABLE_AREA = 0;
         public const int Y_START_MOVABLE_AREA = 24;
         public const int WIDTH_MOVABLE_AREA = WIDTH_SHOP;
@@ -35,9 +37,13 @@ namespace WF_SimulationMagasin
         private Timer Timer { get; set; }
         private DateTime Time { get; set; }
         public ShopConfig ShopConfig { get; private set; }
+        public bool SimulationRunning { get; set; }
+        public long LastRefresh { get; private set; } //Time since last update
+        public Stopwatch Stopwatch { get; set; }
 
         private Button btnAddClients;
         private Button btnAddHour;
+        private Button btnStartStop;
         private MenuStrip menu;
         private ToolStripMenuItem tsmiAbout;
         private ToolStripMenuItem tsmiParams;
@@ -50,8 +56,12 @@ namespace WF_SimulationMagasin
             this.ShopConfig = new ShopConfig();
             Timer = new Timer();
             Timer.Interval = 1000 / FPS;
-            Timer.Enabled = true;
+            Timer.Enabled = START_SIMULATION_ON_STARTUP;
             Timer.Tick += OnTick;
+
+            this.Stopwatch = Stopwatch.StartNew();
+
+            SimulationRunning = START_SIMULATION_ON_STARTUP;
 
             DoubleBuffered = true;
             Paint += Shop_Paint;
@@ -59,7 +69,6 @@ namespace WF_SimulationMagasin
             this.Customers = new List<Customer>();
             this.CheckoutCounters = new List<CheckoutCounter>();
             this.Random = new Random();
-            this.Time = DateTime.Now;
             this.Time = new DateTime(1970, 1, 1, OPENING_TIME, 0, 0);
             //Instance checkout counters
             for (int i = 0; i < ShopConfig.NbCheckoutCounters; i++)
@@ -71,22 +80,24 @@ namespace WF_SimulationMagasin
 
             this.btnAddClients = new Button();
             this.btnAddHour = new Button();
+            this.btnStartStop = new Button();
             this.menu = new MenuStrip();
             this.tsmiAbout = new ToolStripMenuItem();
             this.tsmiParams = new ToolStripMenuItem();
 
             this.Controls.Add(this.btnAddHour);
             this.Controls.Add(this.btnAddClients);
+            this.Controls.Add(this.btnStartStop);
             this.Controls.Add(this.menu);
             this.menu.Items.Add(this.tsmiAbout);
-            this.menu.Items.Add(this.tsmiParams);
+            this.menu.Items.Add(this.tsmiParams); 
 
             // 
             // btnAddClients
             // 
-            this.btnAddClients.Location = new System.Drawing.Point(732, 485);
+            this.btnAddClients.Location = new System.Drawing.Point(720, 485);
             this.btnAddClients.Name = "btnAddClients";
-            this.btnAddClients.Size = new System.Drawing.Size(187, 50);
+            this.btnAddClients.Size = new System.Drawing.Size(100, 50);
             this.btnAddClients.TabIndex = 1;
             this.btnAddClients.Text = "Ajouter 5 clients";
             this.btnAddClients.UseVisualStyleBackColor = true;
@@ -94,13 +105,23 @@ namespace WF_SimulationMagasin
             // 
             // btnAddHour
             // 
-            this.btnAddHour.Location = new System.Drawing.Point(732, 541);
+            this.btnAddHour.Location = new System.Drawing.Point(820, 485);
             this.btnAddHour.Name = "btnAddHour";
-            this.btnAddHour.Size = new System.Drawing.Size(187, 50);
+            this.btnAddHour.Size = new System.Drawing.Size(100, 50);
             this.btnAddHour.TabIndex = 2;
             this.btnAddHour.Text = "Ajouter 1H";
             this.btnAddHour.UseVisualStyleBackColor = true;
             this.btnAddHour.Click += AddHour;
+            // 
+            // btnStartStop
+            // 
+            this.btnStartStop.Location = new System.Drawing.Point(720, 540);
+            this.btnStartStop.Name = "btnStartStop";
+            this.btnStartStop.Size = new System.Drawing.Size(200, 50);
+            this.btnStartStop.TabIndex = 2;
+            this.btnStartStop.Text = "Start/Stop";
+            this.btnStartStop.UseVisualStyleBackColor = true;
+            this.btnStartStop.Click += StartStopSimulation;
             //
             // tsmiAbout
             //
@@ -174,10 +195,17 @@ namespace WF_SimulationMagasin
         /// <param name="e"></param>
         private void OnTick(object sender, EventArgs e)
         {
-            Customers.ForEach(customer => customer.Update());
-            ManageCheckoutCounters();
-            this.Time = this.Time.AddMinutes(TIME_ADD);
-            SpawnCustomers();
+            if (SimulationRunning)
+            {
+                Customers.ForEach(customer => customer.Update());
+                ManageCheckoutCounters();
+                this.Time = this.Time.AddMinutes(TIME_ADD);
+                if (this.Time.Minute == 0 && this.Time.Second == 0)
+                {
+                    SpawnCustomers();
+                }
+            }
+            this.LastRefresh = Stopwatch.ElapsedMilliseconds;
             Invalidate(true);
         }
         /// <summary>
@@ -213,15 +241,12 @@ namespace WF_SimulationMagasin
                 CheckoutCounters.Where(cc => cc.State == CheckoutCounterStates.Open && cc.TimeSinceLineEmpty >= ShopConfig.NbSecondsBeforeCounterCloses).First().State = CheckoutCounterStates.Closed;
             }
         }
+        /// <summary>
+        /// Spawns new customers given the number desired per hour
+        /// </summary>
         private void SpawnCustomers()
         {
-            int desiredNbCustomers, nbCustomers;
-
-            desiredNbCustomers = ShopConfig.NbCustomersPerHour[this.Time.Hour];
-
-            nbCustomers = desiredNbCustomers - this.Customers.Count;
-
-            for (int i = 0; i < nbCustomers; i++)
+            for (int i = 0; i < ShopConfig.NbCustomersPerHour[this.Time.Hour]; i++)
             {
                 AddCustomer();
             }
@@ -234,7 +259,7 @@ namespace WF_SimulationMagasin
         {
             if (CheckoutCounters.Any(cc => cc.State == CheckoutCounterStates.Open && cc.LineLength < ShopConfig.NbCustomersPerCounter))
             {
-                return this.CheckoutCounters.Where(cc => cc.State == CheckoutCounterStates.Open && cc.LineLength < ShopConfig.NbCustomersPerCounter).OrderBy(cc => cc.HighestWaitTime).First();
+                return this.CheckoutCounters.Where(cc => cc.State == CheckoutCounterStates.Open && cc.LineLength < ShopConfig.NbCustomersPerCounter).OrderBy(cc => cc.LineLength).First();
             }
             else
             {
@@ -249,10 +274,21 @@ namespace WF_SimulationMagasin
         {
             this.Customers.Remove(customer);
         }
+        /// <summary>
+        /// Adds 1 hour to the internal DateTime
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void AddHour(object sender, EventArgs e)
         {
             this.Time = this.Time.Add(new TimeSpan(0, 1, 0, 0));
+            SpawnCustomers();
         }
+        /// <summary>
+        /// Adds 5 customers to the shop
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Add5Customers(object sender, EventArgs e)
         {
             for (int i = 0; i < 5; i++)
@@ -260,6 +296,19 @@ namespace WF_SimulationMagasin
                 AddCustomer();
             }
         }
+        /// <summary>
+        /// Plays and pauses the simulation
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void StartStopSimulation(object sender, EventArgs e)
+        {
+            this.SimulationRunning = !this.SimulationRunning;
+            Customers.ForEach(customer => customer.Timer.Enabled = this.SimulationRunning);
+        }
+        /// <summary>
+        /// Add a customer to the shop
+        /// </summary>
         private void AddCustomer()
         {
             TimeSpan timeUntilCheckout = new TimeSpan(

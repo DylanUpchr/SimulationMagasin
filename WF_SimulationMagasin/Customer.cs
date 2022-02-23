@@ -33,7 +33,6 @@ namespace WF_SimulationMagasin
         public TimeSpan TimeSpentWaiting { get; set; } //How much time the customer has been waiting for a line
         public TimeSpan TimeSpentCheckingOut { get; set; } //How much time the customer has been at the checkout counter
         internal CustomerStates State { get; set; } //Current state
-        private Timer Timer { get; set; }
         /// <summary>
         /// Customer constructor
         /// </summary>
@@ -48,8 +47,8 @@ namespace WF_SimulationMagasin
             this.Timer.Interval = 1000;
             this.Timer.Tick += new EventHandler(OnTick);
             this.Timer.Enabled = true;
-            this.Stopwatch = new Stopwatch();
-            this.Stopwatch.Start();
+            /*this.Stopwatch = new Stopwatch();
+            this.Stopwatch.Start();*/
             this.X = startX;
             this.Y = startY;
             this.SpeedX = speed;
@@ -63,7 +62,7 @@ namespace WF_SimulationMagasin
         /// <summary>
         /// Move sprite based on speed and time since last movement and change customer states
         /// </summary>
-        public override void Update()
+        public void Update()
         {
             if (this.State == CustomerStates.FindingLine || this.State == CustomerStates.GoingToLine)
             {
@@ -107,8 +106,8 @@ namespace WF_SimulationMagasin
                     }
                 }
                 //Calculate pixels to move
-                movementX = (int)((movementX * (Stopwatch.ElapsedMilliseconds - LastRefresh) / 1000f));
-                movementY = (int)((movementY * (Stopwatch.ElapsedMilliseconds - LastRefresh) / 1000f));
+                movementX = (int)((movementX * (Shop.Stopwatch.ElapsedMilliseconds - Shop.LastRefresh) / 1000f));
+                movementY = (int)((movementY * (Shop.Stopwatch.ElapsedMilliseconds - Shop.LastRefresh) / 1000f));
                 //If the desired movement isn't out of bounds move, otherwise invert speed
                 if (movementX + X >= Shop.X_START_MOVABLE_AREA && movementX + X <= (State == CustomerStates.Browsing ? Shop.WIDTH_MOVABLE_AREA : Shop.Width) - Size)
                 {
@@ -126,7 +125,6 @@ namespace WF_SimulationMagasin
                     SpeedY = -SpeedY;
                 }
             }
-            LastRefresh = Stopwatch.ElapsedMilliseconds;
         }
         /// <summary>
         /// Draw client based on state

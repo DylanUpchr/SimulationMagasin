@@ -25,11 +25,10 @@ namespace WF_SimulationMagasin
 
         internal CheckoutCounterStates State; //Current state
         public Point LineStart { get { return new Point(this.X, this.Y - this.Size - LineLength * Customer.SIZE); } } //Coordinates of start of line, calculated to be behind the last customer in line
-        public int HighestWaitTime { get { return Line.Select(c => (int)c.TimeSpentWaiting.TotalSeconds).DefaultIfEmpty(0).Max(); } } //Highest wait time of custoemrs in line
+        public int TimeUntilNextCustomerLeaves { get { return (Line.Count > 0 ? CHECKOUT_DELAY - Line.First().TimeSpentCheckingOut.Seconds : 0); } }
         public int LineLength { get { return Line.Count; } } //Number of customers in line at counter
         public List<Customer> Line { get; set; } //Checkout counter line
         public int TimeSinceLineEmpty { get; set; } //Number of seconds since the line was empty 
-        private Timer Timer { get; set; }
         /// <summary>
         /// Checkout counter constructor
         /// </summary>
@@ -84,7 +83,7 @@ namespace WF_SimulationMagasin
             e.Graphics.DrawRectangle(new Pen(Color.Black), X, Y - ShopConfig.NB_CUSTOMERS_PER_COUNTER * SIZE, SIZE - 1, ShopConfig.NB_CUSTOMERS_PER_COUNTER * SIZE + 1);
             e.Graphics.FillRectangle(new SolidBrush(rectangleColor), X, Y, Size, Size);
             e.Graphics.DrawString(
-                (this.HighestWaitTime > 0 ? this.HighestWaitTime.ToString() : "-"),
+                (this.TimeUntilNextCustomerLeaves > 0 ? this.TimeUntilNextCustomerLeaves.ToString() : "-"),
                 new System.Drawing.Font("Arial", 16),
                 new SolidBrush(textColor),
                 this.X + this.Size / 4,
